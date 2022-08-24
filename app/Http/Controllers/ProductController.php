@@ -93,7 +93,15 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        return dd($this->request);
+        $product = Product::where('id', $id)->first();
+
+        if (!$product) {
+            return redirect()->back();
+        }           
+
+        return view('admin.pages.products.show', [
+            'product' => $product
+        ]);
     }
 
     /**
