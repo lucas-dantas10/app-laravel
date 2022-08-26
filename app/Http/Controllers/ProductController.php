@@ -11,10 +11,12 @@ class ProductController extends Controller
 {
     
     private $request;
+    private $repository;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, Product $product)
     {
         $this->request = $request;
+        $this->repository = $product;
 
         //middleware no Controller
         // $this->middleware('auth');
@@ -32,7 +34,7 @@ class ProductController extends Controller
      */
     public function index()
     {        
-        $products = Product::paginate(15); //pegar só os 15 primeiros do banco de dados
+        $products = $this->repository->latest()->paginate(15); //pegar só os 15 primeiros do banco de dados
 
         //o compact cria um array associativo
         return view('admin.pages.products.index', [
@@ -59,6 +61,12 @@ class ProductController extends Controller
     public function store(StoreUpdateProductRequest $request)
     {
 
+        $data = $request->only('name', 'description', 'price');
+
+        $this->repository->create($data);
+
+        return redirect()->route('products.index');
+
         //validações de campos no formulário (ESSE MÉTODO NAO É RECOMENDADO)
         
         /* $request->validate([
@@ -67,22 +75,19 @@ class ProductController extends Controller
             'photo' => 'required|image',
         ]); */
 
-
-        dd('OK');
-
         // dd($request->all());
         // dd($request->only(['name', 'description']));
         // dd($request->description); dd($request->name);
         // dd($request->has('name')) retorno true or false;
         // dd($request->input('name', 'default'));
         // dd($request->except(['_token']));
-        if ($request->file('photo')->isValid()) { //valida o arquivo (se foi uploaded com sucesso)
+        // if ($request->file('photo')->isValid()) { valida o arquivo (se foi uploaded com sucesso)
             // dd($request->photo->extension()); Pega a extensao do arquivo (ex: PDF, PNG, JPEG etc)
             //dd($request->photo->getClientOriginalName()); Pega o nome original do arquivo
             //dd($request->photo->store('products')); Guarda o arquivo dentro da pasta storage/products (products é o nome escolhido para a pasta)
-            $nameFile = $request->name . '.' . $request->photo->extension();
-            dd($request->photo->storeAs('products', $nameFile)); //escolhe um nome para o arquivo e armazena no storage
-        }
+            // $nameFile = $request->name . '.' . $request->photo->extension();
+            // dd($request->photo->storeAs('products', $nameFile)); escolhe um nome para o arquivo e armazena no storage
+        // }
     }
 
     /**
@@ -93,7 +98,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::where('id', $id)->first();
+        $product = $this->repository->where('id', $id)->first();
 
         if (!$product) {
             return redirect()->back();
@@ -112,19 +117,34 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        return view('admin.pages.products.edit', compact('id'));
+        $product = $this->repository->find($id);
+
+        if (!$product) {
+            return redirect()->back();
+        }
+
+        return view('admin.pages.products.edit', [
+            'product' => $product
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  StoreUpdateProductRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreUpdateProductRequest $request, $id)
     {
-        dd("ATUALIZANDO O PRODUTO {$id}");
+        $product = $this->repository->find($id);
+        if (!$product) {
+            return redirect()->back();
+        }
+
+        $product->update($request->all());
+
+        return redirect()->route('products.index');
     }
 
     /**
@@ -135,6 +155,14 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $product = $this->repository->find($id);
+
+        if (!$product) {
+            return redirect()->back();
+        }
+
+        $product->delete();
+
+        return redirect()->route('products.index');
     }
 }

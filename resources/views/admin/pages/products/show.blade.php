@@ -11,5 +11,13 @@
         <li>Preço {{ $product->price }}</li>
         <li>Descrição {{ $product->description }}</li>
     </ul>
+
+    <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+        @method('DELETE')
+        @csrf
+
+        <button type="submit" class="btn btn-danger">Deletar Produto</button>
+
+    </form>
 @endsection
 
