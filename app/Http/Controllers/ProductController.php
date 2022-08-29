@@ -60,34 +60,18 @@ class ProductController extends Controller
      */
     public function store(StoreUpdateProductRequest $request)
     {
+        $data = $request->only('name', 'price', 'description');
 
-        $data = $request->only('name', 'description', 'price');
+        if ($request->hasFile('image') && $request->image->isValid()) {
+            dd($request->image->store('products'));
+            $imagePath = $request->image->store('products');
+
+            $data['image'] = $imagePath;
+        }
 
         $this->repository->create($data);
 
         return redirect()->route('products.index');
-
-        //validações de campos no formulário (ESSE MÉTODO NAO É RECOMENDADO)
-        
-        /* $request->validate([
-            'name' => 'required|min:3|max:255',
-            'description' => 'nullable|min:3|max:10000',
-            'photo' => 'required|image',
-        ]); */
-
-        // dd($request->all());
-        // dd($request->only(['name', 'description']));
-        // dd($request->description); dd($request->name);
-        // dd($request->has('name')) retorno true or false;
-        // dd($request->input('name', 'default'));
-        // dd($request->except(['_token']));
-        // if ($request->file('photo')->isValid()) { valida o arquivo (se foi uploaded com sucesso)
-            // dd($request->photo->extension()); Pega a extensao do arquivo (ex: PDF, PNG, JPEG etc)
-            //dd($request->photo->getClientOriginalName()); Pega o nome original do arquivo
-            //dd($request->photo->store('products')); Guarda o arquivo dentro da pasta storage/products (products é o nome escolhido para a pasta)
-            // $nameFile = $request->name . '.' . $request->photo->extension();
-            // dd($request->photo->storeAs('products', $nameFile)); escolhe um nome para o arquivo e armazena no storage
-        // }
     }
 
     /**
@@ -164,5 +148,21 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('products.index');
+    }
+
+    /*
+     * Search Products
+    */
+
+    public function search(Request $request)
+    {
+        $filters = $request->except('_token');
+
+        $products = $this->repository->search($request->filter);
+
+        return view('admin.pages.products.index', [
+            'products' => $products,
+            'filters' => $filters
+        ]);
     }
 }

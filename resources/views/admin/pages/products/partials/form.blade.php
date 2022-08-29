@@ -12,7 +12,11 @@
 <div class="form-group mb-3">
     <input type="text" name="description" class="form-control" placeholder="Descrição nova:" value="{{ $product->description ?? old('description') }}">
 </div>       
-       
+
+<div class="form-group">
+    <input type="file" name="image">
+</div>
+
 <div class="form-group">
     <button class="btn btn-success">Enviar</button>
 </div>

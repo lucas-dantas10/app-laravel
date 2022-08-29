@@ -9,8 +9,20 @@
 
     <hr>
 
-    <table class="table table-striped">
+    <form action="{{ route('products.search') }}" method="POST" class="form form-inline">
+        @csrf
+        <div class="form-group">
+            <input type="text" name="filter" placeholder="Filtrar:" class="form-control" value="{{ $filters['filter'] ?? '' }}">
+        </div>
+        
+        <div class="form-group ml-3">
+            <button class="btn btn-info" type="submit">Pesquisar</button>
+        </div>        
+    </form>
+
+    <table class="table table-striped mt-3">
         <thead>
+            <th>Imagem</th>
             <th>Nome</th>
             <th>Preço</th>
             <th width="100">Ações</th>
@@ -19,6 +31,13 @@
         <tbody>
             @foreach ($products as $product)
                 <tr>
+                    <td>
+                        @if ($product->photo)
+                            <img src="{{url("storage/$product->image")}}" alt="{{$product->name}}">
+                        @else
+                            
+                        @endif
+                    </td>
                     <td>
                         {{ $product->name }}
                     </td>
@@ -34,6 +53,11 @@
         </tbody>
     </table>
 
-    {!! $products->links() !!}
+    @if (isset($filters))
+        {!! $products->appends($filters)->links() !!} 
+    @else
+        {!! $products->links() !!}
+    @endif
+    
     
 @endsection

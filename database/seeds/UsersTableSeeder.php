@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -13,7 +12,7 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(Product::class, 5)->create();
+        factory(User::class, 10)->create();
         /* User::create([
             'name' => 'Lucas Dantas',
             'email' => 'lucas.dantas@gmail.com',

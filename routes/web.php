@@ -1,7 +1,9 @@
 <?php
 
+Route::any('products/search', 'ProductController@search')->name('products.search')->middleware('auth');
+
 // CRUD nas rotas simplificado
-Route::resource('products', 'ProductController'); //->middleware('auth');
+Route::resource('products', 'ProductController')->middleware(['auth', 'check.is.admin']);
 
 // CRUD nas rotas mais verboso
 /* Route::name('products.')->group(function () {
@@ -23,5 +25,7 @@ Route::get('/login', function () {
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
+
+Auth::routes();
